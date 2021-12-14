@@ -21,6 +21,7 @@ Data and evaluation server can be found [here](http://ptr.csail.mit.edu/)
 
 ## TODOs
 Data generation codes and baseline models will be available soon!
+(Currently we provide a rough version of the data generation codes, which will be arranged later)
 
 ## Errata
 We have manually examined the images, annotations and questions twice. However, provided that there are annotation errors of the PartNet dataset we used, there could still be some errors in the scene annotations. **If you find any errors that make the questions unanswerable, please contact yninghong@gmail.com**. 
@@ -51,6 +52,17 @@ The scene annotation is a json file that contains the following keys:
     projection_matrix   #the projection matrix of the camera to reconstruct 3D scene using depths
 ```
 
+The question file is a json file which contains a list of questions. Each question has the following keys:
+```
+    image_filename      #the image file that the question asks about
+    image_index         #the image index that the question asks about
+    program             #the original program used to generate the question
+    program_nsclseq     #rearranged program as described in the paper
+    question            #the question text
+    answer              #the answer text
+    type1               #the five questions types
+    type2               #the 14 subtypes described in Table 2 in the paper
+```
 ## Citations
     @inproceedings{hong2021ptr,
     author = {Hong, Yining and Yi, Li and Tenenbaum, Joshua B and Torralba, Antonio and Gan, Chuang},
