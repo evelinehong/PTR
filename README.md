@@ -21,7 +21,6 @@ Data and evaluation server can be found [here](http://ptr.csail.mit.edu/)
 
 ## TODOs
 Data generation codes and baseline models will be available soon!
-(Currently we provide a rough version of the data generation codes, which will be arranged later)
 
 ## Errata
 We have manually examined the images, annotations and questions twice. However, provided that there are annotation errors of the PartNet dataset we used, there could still be some errors in the scene annotations. **If you find any errors that make the questions unanswerable, please contact yninghong@gmail.com**. 
