@@ -1,10 +1,3 @@
-# Copyright 2017-present, Facebook, Inc.
-# All rights reserved.
-#
-# This source code is licensed under the BSD-style license found in the
-# LICENSE file in the root directory of this source tree. An additional grant
-# of patent rights can be found in the PATENTS file in the same directory.
-
 import json, os, math
 from collections import defaultdict
 
@@ -580,10 +573,7 @@ def minus_less_handler(scene_struct, inputs, side_inputs):
   assert len(side_inputs) == 0
   if inputs[0] > inputs[1]: return '__INVALID__'
   return inputs[1] - inputs[0]
-# Register all of the answering handlers here.
-# TODO maybe this would be cleaner with a function decorator that takes
-# care of registration? Not sure. Also what if we want to reuse the same engine
-# for different sets of node types?
+
 execute_handlers = {
   'scene': scene_handler,
   #filter

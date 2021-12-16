@@ -691,15 +691,12 @@ def add_random_objects(scene_struct, num_objects, args, camera, split):
       obj = random.choice(objs)
       id2 = obj['anno_id']
  
-    if p_type == "physics":
+    if obj_name == 'Cart' or p_type == "physics":
       cur_shape_dir = "%s/%s"%(args.mobility_dir, id2)
       cur_part_dir = os.path.join(cur_shape_dir, 'textured_objs')
     else:
       cur_shape_dir = "%s/%s"%(args.data_dir, id2)
-      if obj_name == 'Cart':
-        cur_part_dir = os.path.join(cur_shape_dir, 'textured_objs')
-      else:
-        cur_part_dir = os.path.join(cur_shape_dir, 'objs')
+      cur_part_dir = os.path.join(cur_shape_dir, 'objs')
 
     leaf_part_ids = [item.split('.')[0] for item in os.listdir(cur_part_dir) if item.endswith('.obj')]
     cur_render_dir = args.tmp_dir
