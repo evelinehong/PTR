@@ -3,7 +3,19 @@ import math, sys, random, argparse, json, os, tempfile
 from datetime import datetime as dt
 from collections import Counter
 from add_parts import *
+import pybullet as p
 from PIL import Image
+"""
+Renders random scenes using Blender, each with with a random number of objects;
+each object has a random size, position, color, and shape. Objects will be
+nonintersecting but may partially occlude each other. Output images will be
+written to disk as PNGs, and we will also write a JSON file for each image with
+ground-truth scene information.
+
+This file expects to be run from Blender like this:
+
+blender --background --python render_images.py -- [arguments to this script]
+"""
 
 INSIDE_BLENDER = True
 try:
@@ -11,10 +23,10 @@ try:
   from mathutils import Vector
 except ImportError as e:
   INSIDE_BLENDER = False
-  
 if INSIDE_BLENDER:
-  from mathutils import Matrix
+  # try:
   import utils
+  from utils import *
 
 parser = argparse.ArgumentParser()
 
@@ -22,15 +34,22 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--base_scene_blendfile', default='data/base_scene.blend',
     help="Base blender file on which all scenes are based; includes " +
           "ground plane, lights, and camera.")
-parser.add_argument('--properties_json', default='data/properties_partnet.json')
-parser.add_argument('--tmp_dir', default='./tmp9/')
+parser.add_argument('--properties_json', default='data/properties_partnet.json',
+    help="JSON file defining objects, materials, sizes, and colors. " +
+         "The \"colors\" field maps from CLEVR color names to RGB values; " +
+         "The \"sizes\" field maps from CLEVR size names to scalars used to " +
+         "rescale object models; the \"materials\" and \"shapes\" fields map " +
+         "from CLEVR material and shape names to .blend files in the " +
+         "--object_material_dir and --shape_dir directories respectively.")
+parser.add_argument('--tmp_dir', default='./tmp9')
 parser.add_argument('--material_dir', default='data/materials',
     help="Directory where .blend files for materials are stored")
+
 
 # Settings for objects
 parser.add_argument('--min_objects', default=3, type=int,
     help="The minimum number of objects to place in each scene")
-parser.add_argument('--max_objects', default=6, type=int,
+parser.add_argument('--max_objects', default=3, type=int,
     help="The maximum number of objects to place in each scene")
 parser.add_argument('--min_dist', default=0.25, type=float,
     help="The minimum allowed distance between object centers")
@@ -57,24 +76,24 @@ parser.add_argument('--start_idx', default=0, type=int,
          "multiple machines and recombine the results later.")
 parser.add_argument('--num_images', default=5, type=int,
     help="The number of images to render")
-parser.add_argument('--filename_prefix', default='PTR',
+parser.add_argument('--filename_prefix', default='PARTNET2',
     help="This prefix will be prepended to the rendered images and JSON scenes")
 parser.add_argument('--split', default='new',
     help="Name of the split for which we are rendering. This will be added to " +
          "the names of rendered images, and will also be stored in the JSON " +
          "scene structure for each image.")
-parser.add_argument('--output_image_dir', default='../output/images/',
+parser.add_argument('--output_image_dir', default='../output/images_physics/',
     help="The directory where output images will be stored. It will be " +
          "created if it does not exist.")
-parser.add_argument('--output_scene_dir', default='../output/scenes/',
+parser.add_argument('--output_scene_dir', default='../output/scenes_physics/',
     help="The directory where output JSON scene structures will be stored. " +
          "It will be created if it does not exist.")
-parser.add_argument('--output_depth_dir', default='../output/depths/',
+parser.add_argument('--output_depth_dir', default='../output/depths_physics/',
     help="The directory where output JSON scene structures will be stored. " +
          "It will be created if it does not exist.")
-parser.add_argument('--output_scene_file', default='../output/ptr_scenes.json',
+parser.add_argument('--output_scene_file', default='../output/partnet_scenes.json',
     help="Path to write a single JSON file containing all scene information")
-parser.add_argument('--output_blend_dir', default='../output/blendfiles',
+parser.add_argument('--output_blend_dir', default='output/blendfiles',
     help="The directory where blender scene files will be stored, if the " +
          "user requested that these files be saved using the " +
          "--save_blendfiles flag; in this case it will be created if it does " +
@@ -140,8 +159,6 @@ def main(args):
     os.makedirs(args.output_image_dir)
   if not os.path.isdir(args.output_scene_dir):
     os.makedirs(args.output_scene_dir)
-  if not os.path.isdir(args.output_depth_dir):
-    os.makedirs(args.output_depth_dir)
   if args.save_blendfiles == 1 and not os.path.isdir(args.output_blend_dir):
     os.makedirs(args.output_blend_dir)
   
@@ -199,12 +216,15 @@ def render_scene(args,
     output_image='render.png',
     output_scene='render_json',
     output_blendfile=None,
-    split="train"
+    split='train'
   ):
 
+  os.mkdir("%s_urdf"%args.tmp_dir)
+
   # Load the main blendfile
-  base_scene_blendfiles = ['data/base_scene2.blend']
+  base_scene_blendfiles = ['data/base_scene_physics.blend']
   bpy.ops.wm.open_mainfile(filepath=random.choice(base_scene_blendfiles))
+
 
   # Set render arguments so we can get pixel coordinates later.
   # We use functionality specific to the CYCLES renderer so BLENDER_RENDER
@@ -237,11 +257,11 @@ def render_scene(args,
 
   # This will give ground-truth information about the scene and its objects
   scene_struct = {
+      'split': output_split,
       'image_index': output_index,
       'image_filename': os.path.basename(output_image),
       'objects': [],
       'directions': {},
-      'split': split
   }
 
   # Put a plane on the ground so we can compute cardinal directions
@@ -254,11 +274,8 @@ def render_scene(args,
   # Add random jitter to camera position
   if args.camera_jitter > 0:
     for i in range(3):
-      if i == 0:
-        bpy.data.objects['Camera'].location[i] -= random.random() * 1.6
-      else:
-        bpy.data.objects['Camera'].location[i] += rand(args.camera_jitter)
-      # bpy.data.objects['Camera'].location[i] *= 1.2
+      bpy.data.objects['Camera'].location[i] += rand(args.camera_jitter)
+      bpy.data.objects['Camera'].location[i] *= 1.2
 
   # Figure out the left, up, and behind directions along the plane and record
   # them in the scene structure
@@ -270,18 +287,10 @@ def render_scene(args,
   plane_behind = (cam_behind - cam_behind.project(plane_normal)).normalized()
   plane_left = (cam_left - cam_left.project(plane_normal)).normalized()
   plane_up = cam_up.project(plane_normal).normalized()
-  
-  bpy.context.scene.update()
-  location, rotation = bpy.data.objects['Camera'].matrix_world.decompose()[0:2]
-  K = utils.get_3x4_P_matrix_from_blender(bpy.data.objects['Camera'])[0]
-  projection_matrix = np.linalg.inv(np.array(K))
-
-  scene_struct["cam_location"] = np.array(location).tolist()
-  scene_struct["cam_rotation"] = np.array(rotation).tolist()
 
   # Delete the plane; we only used it for normals anyway. The base scene file
   # contains the actual ground plane.
-  utils.delete_object(plane)
+  delete_object(plane)
 
   mat = bpy.data.materials.new(name="Wall")
   mat.use_nodes = True
@@ -310,14 +319,6 @@ def render_scene(args,
 
   links.new( output.inputs['Surface'], diffuse.outputs['BSDF'])
   links.new(diffuse.inputs['Color'],   texture.outputs['Color'])
-  # links.new(texture.inputs['Vector'], mapping.outputs['Vector'])
-  # links.new(mapping.inputs['Vector'],    uvmap.outputs['UV'])
-
-  # map_node = nodes.get("Mapping")
-  # map_node.rotation[2] = math.radians(90)
-  # map_node.scale[0] = 10.0
-  # map_node.scale[1] = 10.0
-  
 
   mat2 = bpy.data.materials.new(name="Floor")
   mat2.use_nodes = True
@@ -346,7 +347,6 @@ def render_scene(args,
 
   links.new(output.inputs['Surface'], diffuse.outputs['BSDF'])
   links.new(diffuse.inputs['Color'],   texture.outputs['Color'])
-
 
   #Check if the active object has a material slot, create one if it doesn't. 
   #Assign the material to the first slot for the active object.
@@ -382,37 +382,18 @@ def render_scene(args,
       bpy.data.objects['Lamp_Fill'].location[i] += rand(args.fill_light_jitter)
 
   # Now make some random objects
-  objects, blender_objects = add_random_objects(scene_struct, num_objects, args, camera, split)
+  objects, blender_objects, urdf_objects = add_random_objects(scene_struct, num_objects, args, camera, split=split)
 
   # Render the scene and dump the scene data structure
-  scene_struct['objects'] = objects
-  scene_struct['projection_matrix'] = projection_matrix.tolist()
-  scene_struct['relationships'] = compute_all_relationships(scene_struct)
+  
   # while True:
   print ("rendering")
-  # scene = bpy.context.scene
-  # scene.render.resolution_x = 640
-  # scene.render.resolution_y = 480
-  # scene.render.resolution_percentage = 100
+
   output_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeComposite')
   render_node = bpy.context.scene.node_tree.nodes['Render Layers']
-  # depth_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeOutputFile')
-  # depth_node.base_path = "../output/images"
-  # depth_node.file_slots[0].path = output_image + ".depth"
-  # invert_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeInvert')
-  # normalize_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeNormalize')
-  # depth_node.file_slots[0].use_node_format = False
-  # depth_node.file_slots[0].format.color_mode = 'RGB'
-  # link1 = bpy.context.scene.node_tree.links.new(render_node.outputs[2], invert_node.inputs[1])
-  # link2 = bpy.context.scene.node_tree.links.new(invert_node.outputs[0], normalize_node.inputs[0])
-  # link3 = bpy.context.scene.node_tree.links.new(normalize_node.outputs[0], depth_node.inputs[0])
+
   link4 = bpy.context.scene.node_tree.links.new(render_node.outputs[0], output_node.inputs[0])
 
-  # range_node = bpy.context.scene.node_tree.nodes.new('CompositorNodeMapRange')
-  # range_node.inputs[1].default_value = 5.000
-  # range_node.inputs[2].default_value = 30.000
-  # range_node.inputs[3] = 0.000
-  # range_node.inputs[4] = 1.000
   output_node2 = bpy.context.scene.node_tree.nodes.new('CompositorNodeOutputFile')
   output_node2.base_path = args.output_depth_dir
   output_node2.format.file_format = 'OPEN_EXR'
@@ -421,6 +402,22 @@ def render_scene(args,
   link6 = bpy.context.scene.node_tree.links.new(render_node.outputs[2], output_node2.inputs[0])
   bpy.ops.render.render(write_still=True)
     # break
+  
+  physics = True
+
+  try:
+    simulate(urdf_objects)
+
+  except:
+    physics = False
+
+  scene_struct['physics'] = physics
+
+  cmd = 'rm -rf %s_urdf' %args.tmp_dir
+  call(cmd, shell=True)
+
+  scene_struct['objects'] = objects
+  scene_struct['relationships'] = compute_all_relationships(scene_struct)
 
   with open(output_scene, 'w') as f:
     json.dump(scene_struct, f, indent=2)
@@ -428,8 +425,141 @@ def render_scene(args,
   if output_blendfile is not None:
     bpy.ops.wm.save_as_mainfile(filepath=output_blendfile)
 
+def simulate(urdf_objects):
+    client = p.connect(p.GUI)
+    p.setGravity(0, 0, -10, physicsClientId=client) 
+    urdfs = []
+    from urdfpy import URDF
 
-def add_random_objects(scene_struct, num_objects, args, camera, split="train"):
+    for (k,urdf_object) in enumerate(urdf_objects):
+      urdf = urdf_object[0]
+      loc = urdf_object[1]
+      ori = urdf_object[2]
+      obj_name = urdf_object[3]
+      if 'Cart' in obj_name:
+        urdf_objects[k][1][2] -= 0.1
+        loc = urdf_object[1]
+
+      urdf_id = p.loadURDF(urdf, loc)
+      urdfs.append(urdf_id)
+      # numJoints = p.getNumJoints(urdf_id)
+      # for j in range (numJoints):
+
+      if (not 'Cart' in obj_name) and (not 'physics' in obj_name):
+        # p.changeDynamics(urdf_id, -1, lateralFriction=1, spinningFriction=1, rollingFriction=1)
+        p.changeDynamics(urdf_id, -1, mass=25)
+      else:
+        try:
+          urdf_parse = URDF.load(urdf)
+          numJoints = p.getNumJoints(urdf_id)
+          # p.changeDynamics(urdf_id, -1, mass=1.0)
+          for j in range (numJoints):
+            joint_type = p.getJointInfo(urdf_id, j)[2] 
+            if len(urdf_parse.links[j+1].visuals):
+              if "wheel" in urdf_parse.links[j+1].visuals[0].name:
+                p.changeDynamics(urdf_id, j, lateralFriction=0.00000000000001, spinningFriction=0.00000000000001)
+                if 'Chair' in obj_name:
+                  p.changeDynamics(urdf_id, j, mass=2.5)
+                p.setJointMotorControl2(urdf_id,j, p.VELOCITY_CONTROL,force=1000)
+              else:
+                if "back" in urdf_parse.links[j+1].visuals[0].name or "seat" in urdf_parse.links[j+1].visuals[0].name:
+                  p.changeDynamics(urdf_id, j, mass=10)
+                if "leg" in urdf_parse.links[j+1].visuals[0].name or "central"in urdf_parse.links[j+1].visuals[0].name:
+                  p.changeDynamics(urdf_id, j, mass=1)
+                p.changeDynamics(urdf_id, j, lateralFriction=1, spinningFriction=1)
+                p.setJointMotorControl2(urdf_id,j, p.VELOCITY_CONTROL,force=100)
+                if "caster" in urdf_parse.links[j+1].visuals[0].name:
+                  p.changeDynamics(urdf_id, j, mass=2.5)
+                  p.setJointMotorControl2(urdf_id,j, p.VELOCITY_CONTROL,force=100)       
+        except:
+          print ("parse error")
+          numJoints = p.getNumJoints(urdf_id)
+          for j in range (numJoints):
+            joint_type = p.getJointInfo(urdf_id, j)[2] 
+            p.changeDynamics(urdf_id, j, mass=2.5)
+            if joint_type == 0:
+              p.changeDynamics(urdf_id, j, lateralFriction=0.00000000000001, spinningFriction=0.00000000000001)
+              # if 'Chair' in obj_name:           
+              p.setJointMotorControl2(urdf_id,j, p.VELOCITY_CONTROL,force=100)
+            else:
+              p.changeDynamics(urdf_id, j, lateralFriction=1, spinningFriction=1, rollingFriction=1)
+              p.setJointMotorControl2(urdf_id,j, p.VELOCITY_CONTROL,force=100)
+      
+    import pybullet_data
+    p.setAdditionalSearchPath(pybullet_data.getDataPath())
+    planeId = p.loadURDF("plane.urdf", [0,0,0.02])
+    p.changeDynamics(planeId, 0, lateralFriction=100000, spinningFriction=100000)
+    planeId = p.loadURDF("plane.urdf", [-5,0,0], [ 0, 0.7071068, 0, 0.7071068 ])
+    p.changeDynamics(planeId, 0, lateralFriction=100000, spinningFriction=100000)
+    planeId = p.loadURDF("plane.urdf", [0,3,0], [ 0.7071068, 0, 0, 0.7071068  ])
+    p.changeDynamics(planeId, 0, lateralFriction=100000, spinningFriction=100000)
+    planeId = p.loadURDF("plane.urdf", [5,0,0], [ 0, -0.7071068, 0, 0.7071068 ])
+    p.changeDynamics(planeId, 0, lateralFriction=100000, spinningFriction=100000)
+
+    poses = []
+    orns = []
+    stability = []
+    p.resetDebugVisualizerCamera(cameraDistance=3, cameraYaw=0, cameraPitch=-30, cameraTargetPosition=[0,0,1])
+
+    for t in range(500): 
+      if t == 0:
+        for u in urdfs:
+          pos, orn = p.getBasePositionAndOrientation(u)
+          poses.append(np.array(pos))
+          orns.append(np.array(orn))
+
+      if t == 499:
+        for (idx, u) in enumerate(urdfs):
+          pos, orn = p.getBasePositionAndOrientation(u)
+          if np.max(abs(pos - np.array(poses[idx]))) > 0.1 or np.max(abs(orn - np.array(orns[idx]))) > 0.1:
+            objects[idx]["stability"] = "no"
+          else:
+            objects[idx]["stability"] = "yes"
+
+      p.stepSimulation()
+      time.sleep(1/50)
+
+    for (idx, urdf) in enumerate(urdfs):
+      if objects[idx]["stability"] == "no":
+        changes = []
+        loc = urdf_objects[idx][1]
+        new_locs = {"left": [[loc[0] - 0.5, loc[1], loc[2]], [loc[0] - 1.0, loc[1], loc[2]]], "right": [[loc[0] + 0.5, loc[1], loc[2]], [loc[0] + 1.0, loc[1], loc[2]]], "front": [[loc[0], loc[1] - 0.5, loc[2]], [loc[0], loc[1] - 1.0, loc[2]]], "behind": [[loc[0], loc[1] + 0.5, loc[2]], [loc[0], loc[1] + 1.0, loc[2]]]}
+        
+        for key, new_location in new_locs.items():
+          for new_loc in new_location:
+            for (idx2, urdf2) in enumerate(urdfs):
+              loc2 = urdf_objects[idx2][1]
+              p.resetBasePositionAndOrientation(urdf2, loc2, [0,0,0,1])
+
+            poses = []
+            orns = []
+
+            p.resetBasePositionAndOrientation(urdf, new_loc, [0,0,0,1])
+
+            for t in range(500): 
+
+              if t == 0:
+                for u in urdfs:
+                  pos, orn = p.getBasePositionAndOrientation(u)
+                  poses.append(np.array(pos))
+                  orns.append(np.array(orn))
+
+              if t == 499:
+                for (idx3, u) in enumerate(urdfs):
+                  pos, orn = p.getBasePositionAndOrientation(u)
+                  if np.max(abs(pos - np.array(poses[idx]))) > 0.1 or np.max(abs(orn - np.array(orns[idx]))) > 0.1:
+                    pass
+                  else:
+                    if idx == idx3:
+                      changes.append(key)
+
+              p.stepSimulation()
+              time.sleep(1/50)
+
+        objects[idx]["possible_change"] = [changes, new_loc]
+    p.disconnect()
+
+def add_random_objects(scene_struct, num_objects, args, camera, split):
   """
   Add random objects to the current blender scene
   """
@@ -451,25 +581,44 @@ def add_random_objects(scene_struct, num_objects, args, camera, split="train"):
   obj_masks = []
   obj_names = []
   blender_objects = []
+  urdf_objects = []
+  obj_modes = []
+  normals = []
 
   i = 0
   tries = dict()
+  from numpy.random import choice 
 
-  # place object
+  invalid = 0
   while i < num_objects:
     i += 1
+
+    #choose a mode and an object category
+    modes = ["normal", "ground", "side wall"]
+    weight_list2 = [0.4, 0.3, 0.3]
+    mode = choice(modes, 1, p=weight_list2)[0] 
+
+    if len(normals) > obj_modes.count("support") and (not invalid > 5):
+      mode = "support"
+
+    obj_modes.append(mode)
+
+    if mode == "normal": invalid = 0
+
     if not i in tries.keys(): tries[i] = 0
     tries[i] += 1
-    # Try to place the object, ensuring that we don't intersect any existing
-    # objects and that we are more than the desired margin away from all existing
-    # objects along all cardinal directions.
-
     # Choose random categories
-    from numpy.random import choice 
+    
     obj_name = choice(object_list, 1, p=weight_list)[0] 
+
+    if mode == 'support' and ('Refrigerator' in normals[-1][0] or 'Cart' in normals[-1][0] or 'Chair' in normals[-1][0]):
+      obj_name = 'Chair'
+
+    while (mode == 'normal' and obj_name == 'Cart') or (mode == "support" and obj_name == 'Bed'):
+      obj_name = choice(object_list, 1, p=weight_list)[0]
+
     scales = {'Bed': 1.5, 'Table': 1.5, 'Refrigerator': 1.5, 'Chair': 1, 'Cart': 1.25}
     # Choose random orientation for the object.
-
         
     num_tries = 0
     r = scales[obj_name]
@@ -479,18 +628,30 @@ def add_random_objects(scene_struct, num_objects, args, camera, split="train"):
       # the objects in the scene and start over.
       num_tries += 1
       if num_tries > args.max_retries:
-        for (j,obj) in enumerate(blender_objects):
-          utils.delete_object(obj)
-          cmd = 'rm -rf %s' %args.tmp_dir
+        for obj in bpy.data.objects:
+          if 'Table' in obj.name or 'Chair' in obj.name or 'Refrigerator' in obj.name or 'Cart' in obj.name or 'Bed' in obj.name:
+            delete_object(obj)
+          cmd = 'rm -rf %s'%args.tmp_dir
           call(cmd, shell=True)
         return add_random_objects(scene_struct, num_objects, args, camera)
       
-      x = random.uniform(-5, 5)
+      x = random.uniform(-3, 3)
       
-      y = random.uniform(-8, 3)
+      y = random.uniform(-8, 1)
 
       dists_good = True
       margins_good = True
+
+      p_type = "static"
+      if obj_name in ['Chair']:
+        if random.random() > 0.25:
+          p_type = "static"
+        else:
+          p_type = "physics"
+
+      rot = get_rot(obj_name, mode, p_type)
+
+      # try to place the object
       for (m,(xx, yy, rr)) in enumerate(positions):
         dx, dy = abs(x - xx), abs(y - yy)
         dist = math.sqrt(dx * dx + dy * dy)
@@ -501,19 +662,24 @@ def add_random_objects(scene_struct, num_objects, args, camera, split="train"):
 
       if dists_good and margins_good:
         break
-    
-    base = 0.2
-    if obj_name == 'Cart':
-      base = 0.5
-    if random.random() < 0.5:
-      theta = base + random.random() / 2 * 1.2
-    else:
-      theta = -base - random.random() / 2 * 1.2
-    # theta = (random.random() - 0.5) * 1.5
 
-    # get a random object
-    # if obj_name in ['Chair', 'Table', 'Bed', 'Cart']:
+    theta = random.random() * 3.14
+
+    if obj_name == 'Cart':
+      base = 1.5707963
+
+      theta = base
+
+    if mode == "support":
+      theta = normals[-1][2]
+
     category_path = "./data/%s.json" % obj_name.lower()
+    if obj_name in ['Chair']:
+      if p_type == "static":
+        category_path = "./data/%s_static.json" % obj_name.lower()
+      if p_type == "physics":
+        category_path = "./data/%s_physics.json" % obj_name.lower()
+
     f = open(category_path)
     objs = json.load(f)
     if split == "val": objs = objs[:int (len(objs) * 0.14286) - 1]
@@ -525,14 +691,16 @@ def add_random_objects(scene_struct, num_objects, args, camera, split="train"):
       obj = random.choice(objs)
       id2 = obj['anno_id']
  
-    if obj_name == 'Cart':
-      # cur_shape_dir = "../../cart/%s"%id2
+    if p_type == "physics":
       cur_shape_dir = "%s/%s"%(args.mobility_dir, id2)
       cur_part_dir = os.path.join(cur_shape_dir, 'textured_objs')
     else:
-      # cur_shape_dir = "../../data_v0/%s"%id2
       cur_shape_dir = "%s/%s"%(args.data_dir, id2)
-      cur_part_dir = os.path.join(cur_shape_dir, 'objs')
+      if obj_name == 'Cart':
+        cur_part_dir = os.path.join(cur_shape_dir, 'textured_objs')
+      else:
+        cur_part_dir = os.path.join(cur_shape_dir, 'objs')
+
     leaf_part_ids = [item.split('.')[0] for item in os.listdir(cur_part_dir) if item.endswith('.obj')]
     cur_render_dir = args.tmp_dir
 
@@ -564,24 +732,25 @@ def add_random_objects(scene_struct, num_objects, args, camera, split="train"):
           tree_hier = json.load(fin)[0]
       
     obj_name2 = obj_name + str(i)
+    color_dict = dict()
 
-    #get annotations
+    part_list, part_list2, count_list, geo_list1, geo_list2 = get_list(obj_name)
 
-    #part_list2 specifies the parts to be kept; count_list specifies the parts that we want to count the number of; geo_list1 specifies the lists that can be considered as lines; geo_list2 specifies the lists that can be considered as planes
-    part_list, part_list2, count_list, geo_list1, geo_list2 = utils.get_list(obj_name)
+    os.mkdir(os.path.join("%s_urdf", obj_name2)%args.tmp_dir) 
 
     part_dict = dict()
     count_dict = dict()
     objs_dict = dict()
     line_dict = dict()
     plane_dict = dict()
-
     final_objs = []
-    _, _, part_color, part_count, part_objs, all_objects, line_geo, plane_geo = add_one_part(scale, tree_hier, cur_part_dir, cur_render_dir, obj_name2, part_list, geo_list1, geo_list2, part_dict, count_dict, objs_dict, final_objs, line_dict, plane_dict)    
+
+    _, _, part_color, part_count, part_objs, all_objects, line_geo, plane_geo = add_one_part_physics(scale, tree_hier, cur_part_dir, cur_render_dir, obj_name2, part_list, geo_list1, geo_list2, args.tmp_dir, part_dict, count_dict, objs_dict, final_objs, line_dict, plane_dict)    
 
     line_geo_final, plane_geo_final, part_color_all, part_color_final, part_count_final,  geometry, final_objects = revise_annotations(line_geo, plane_geo, part_color, part_count, all_objects, obj_name, part_list2, count_list, theta) 
 
     keep = check_part(obj_name, part_count_final, part_color_final)
+
     if not keep:
       i -= 1
       cmd = 'rm -rf %s'%args.tmp_dir
@@ -613,16 +782,71 @@ def add_random_objects(scene_struct, num_objects, args, camera, split="train"):
         part_f = np.vstack(cur_f_list)
 
         final_objects.append('other')
-        add_mesh (obj_name2, part_v, part_f, args.tmp_dir, color=rgba)
+        add_mesh2 (obj_name2, 'other', part_v, part_f, args.tmp_dir, color=rgba)
 
-    # Actually add the object to the scene
-    utils.add_object(obj_name2, (x, y), args.tmp_dir, theta=theta)
+    loc, ori, norm, valid = add_object2(obj_name2, (x, y), rot, normals, args.tmp_dir, theta=theta, mode=mode)
+    final_location = loc
+    final_orientation = ori
+
+    if not valid:
+      invalid += 1
+      print ("intersecting")
+      bpy.data.objects[obj_name2].select = True
+      bpy.ops.object.delete() 
+      cmd = 'rm -rf %s'%args.tmp_dir
+      call(cmd, shell=True)
+      cmd = 'rm -rf %s_urdf/%s' %(args.tmp_dir, obj_name2)
+      call(cmd, shell=True)
+      cmd = 'rm -rf %s_normal' %args.tmp_dir
+      call(cmd, shell=True)
+      obj_modes.pop(-1)
+      i -= 1
+      continue
+
+    if mode == "normal":
+      if len(norm):
+        normals.append([obj_name2, final_objects, theta, loc, norm])
+      else:
+        for obj in bpy.data.objects:
+          if obj_name2 in obj.name:
+            obj.select = True
+            bpy.ops.object.delete() 
+        cmd = 'rm -rf %s' %args.tmp_dir
+        call(cmd, shell=True)
+        cmd = 'rm -rf %s_urdf/%s' %(args.tmp_dir, obj_name2)
+        call(cmd, shell=True)
+        obj_modes.pop(-1)
+        i -= 1
+
+    line_geo_final = dict()
+    plane_geo_final = dict()
+
+    geometry = True
+    
+    rotation_matrix = Rx(ori[0]) @ Ry(ori[1]) @ Rz(ori[2])
+
+    for part, g in line_geo.items():
+      part = rename_part(part, obj_name)
+      stand = g[0]
+      stand, geometry = check_g(g)
+
+      geo = [stand[0], stand[1], stand[2]]
+      geo = rotation_matrix.dot(geo).tolist()
+
+      line_geo_final[part] = geo
+    
+    for part, g in plane_geo.items():
+      part = rename_part(part, obj_name)
+      stand = g[0]
+      geo = [stand[0], stand[1], stand[2]]
+      geo = rotation_matrix.dot(geo).tolist()
+
+      plane_geo_final[part] = geo
 
     import copy
     part_color_occluded = part_color_final.copy()
     part_count_occluded = part_count_final.copy()
 
-    # get masks and find overlappings
     ims = os.listdir(args.tmp_dir)
     images = [image for image in ims if (image.endswith(".png") and not image == "Image0001.png")]
     images.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
@@ -641,7 +865,8 @@ def add_random_objects(scene_struct, num_objects, args, camera, split="train"):
 
       img = np.asarray(img)
       obj_img += img
-      if len(np.where(img > 0)[0]) < 5:
+      if len(np.where(img > 0)[0]) == 0:
+
         print ("occluded part: %s" %part)
         if part in part_count_occluded.keys():
           part_count_occluded[part] -= 1
@@ -650,15 +875,15 @@ def add_random_objects(scene_struct, num_objects, args, camera, split="train"):
             if part in part_color_occluded.keys(): del part_color_occluded[part]
         else:
           if part in part_color_occluded.keys(): del part_color_occluded[part]
-        
       else:
-        if part in part_color.keys():
+        if part in part_color_occluded.keys():
           # try:
-          rle = utils.binary_mask_to_rle(img)
+          rle = binary_mask_to_rle(img)
           # compressed_rle = mask.frPyObjects(rle, rle.get('size')[0], rle.get('size')[1])
           if not part in part_masks.keys():
             part_masks[part] = []
           part_masks[part].append(rle)
+
     if keep:
       obj_img = np.clip(obj_img, 0, 1).astype('uint8')
       try:
@@ -671,14 +896,18 @@ def add_random_objects(scene_struct, num_objects, args, camera, split="train"):
 
     if keep:
       img = Image.fromarray(obj_img*255, 'L')
-      #img = img.save("./mask/" + obj_name2 + ".png")
-      rle = utils.binary_mask_to_rle(obj_img)
+      rle = binary_mask_to_rle(obj_img)
       # compressed_rle = mask.frPyObjects(rle, rle.get('size')[0], rle.get('size')[1])
       obj_mask = rle
 
       for (im, prev_mask) in enumerate(obj_masks):
+        if mode == "support" and im == len(obj_masks) - 1: continue
         overlapping_area = prev_mask & obj_img
         img = Image.fromarray(overlapping_area*255, 'L')
+        # prev1 = len(np.where(prev_mask > 0)[0])
+        # print (prev1)
+        # obj1 = len(np.where(obj_img > 0)[0])
+        # print (obj1)
         ov = len(np.where(overlapping_area > 0)[0])
         # print (mask1 - mask2)
 
@@ -688,27 +917,95 @@ def add_random_objects(scene_struct, num_objects, args, camera, split="train"):
           break
 
     if not keep:
-      bpy.data.objects[obj_name2].select = True
-      bpy.ops.object.delete() 
+      for obj in bpy.data.objects:
+          if obj_name2 in obj.name:
+            obj.select = True
+            bpy.ops.object.delete() 
       cmd = 'rm -rf %s'%args.tmp_dir
       call(cmd, shell=True)
+      cmd = 'rm -rf %s_urdf/%s' %(args.tmp_dir,obj_name2)
+      call(cmd, shell=True)
+      if mode == "normal": normals.pop(-1)
+      obj_modes.pop(-1)
       i -= 1
       if i >= 5 and tries[i] >= 50: 
         break
       else:
         continue
 
-    cmd = 'rm -rf %s'%args.tmp_dir 
+    cmd = 'rm -rf %s' %args.tmp_dir 
     call(cmd, shell=True)
+    
+    if mode == "support":
+      part_masks2 = dict()
+      import copy
+      part_color_occluded2 = objects[-1]["part_color"]
+      part_count_occluded2 = objects[-1]["part_count"]
+      final_objects = normals[-1][1]
 
-    # Record data about the object in the scene data structure
+      ims = os.listdir('%s_normal'%args.tmp_dir)
+      images = [image for image in ims if (image.endswith(".png") and not image == "Image0001.png")]
+      images.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
+
+      assert len(final_objects) == len(images)
+
+      for (idx, image) in enumerate(images):
+        part = final_objects[idx]
+        img = Image.open('%s_normal/'%args.tmp_dir + image).convert('L')
+
+        img = np.asarray(img)
+        obj_img += img
+        if len(np.where(img > 0)[0]) == 0:
+          print ("occluded part: %s" %part)
+          if part in part_count_occluded2.keys():
+            part_count_occluded2[part] -= 1
+            if part_count_occluded2[part] == 0: 
+              del part_count_occluded2[part]
+              if part in part_color_occluded2.keys(): del part_color_occluded2[part]
+          else:
+            if part in part_color_occluded2.keys(): del part_color_occluded2[part]
+        else:
+          if part in part_color_occluded2.keys():
+            # try:
+            rle = binary_mask_to_rle(img)
+            # compressed_rle = mask.frPyObjects(rle, rle.get('size')[0], rle.get('size')[1])
+            if not part in part_masks2.keys():
+              part_masks2[part] = []
+            part_masks2[part].append(rle)
+
+      cmd = 'rm -rf %s_normal' %args.tmp_dir 
+      call(cmd, shell=True)
+      
+      assert part_masks != part_masks2
+      objects[-1]["part_mask"] = part_masks2
+      objects[-1]["part_color_occluded"] = part_color_occluded2
+      objects[-1]["part_count_occluded"] = part_count_occluded2
+      
     obj_masks.append(obj_img)
     obj_names.append(obj_name)
     obj = bpy.context.object
     blender_objects.append(obj)
     positions.append((x, y, r))
 
-    pixel_coords = utils.get_camera_coords(camera, obj.location)
+    urdf_file = create_urdf_object(obj_name, obj_name2, args.tmp_dir, ori, cur_shape_dir, p_type, id2)
+
+    if p_type == "physics":
+      urdf_objects.append([urdf_file, loc, ori, obj_name + "physics"])
+    else:
+      urdf_objects.append([urdf_file, loc, ori, obj_name])
+
+    # # Attach a random material
+    # mat_name, mat_name_out = random.choice(material_mapping)
+    # add_material(mat_name, Color=rgba)
+
+    # Record data about the object in the scene data structure
+    if mode != "normal":
+      pixel_coords = get_camera_coords(camera, obj.location)
+    else:
+      for obj in bpy.data.objects:
+        if obj_name2 in obj.name:
+          pixel_coords = get_camera_coords(camera, obj.location)
+
 
     part_count = dict()
     for part, count in part_count_final.items():
@@ -729,93 +1026,21 @@ def add_random_objects(scene_struct, num_objects, args, camera, split="train"):
       'partnet_id': id2,
       'part_count': part_count,
       'part_color': part_color_final,
-      'line_geo': line_geo_final,
-      'plane_geo': plane_geo_final,
       'part_count_occluded': part_count_occluded2,
       'part_color_occluded': part_color_occluded,
       'part_color_all': part_color_all,
       'part_mask': part_masks,
       'obj_mask': obj_mask,
       'original_objs': part_objs,
-      '3d_coords': tuple(obj.location),
-      'rotation': theta,
+      '3d_coords': tuple(final_location),
+      'rotation': tuple(final_orientation),
       'pixel_coords': pixel_coords,
       'scale': scale,
       'question_type': q_type
     })
 
-  return objects, blender_objects
+  return objects, blender_objects, urdf_objects
 
-def revise_annotations(line_geo, plane_geo, part_color, part_count, all_objects, obj_name, part_list2, count_list, theta):
-    rotation_matrix = np.array(((np.cos(theta), -np.sin(theta), 0),
-                (np.sin(theta),  np.cos(theta), 0 ),
-                (0, 0, 1))) @ np.array([  [1.0000000,  0.0000000,  0.0000000],
-                [0.0000000,  0.0000000, -1.0000000],
-                [0.0000000,  1.0000000,  0.0000000 ]])
-
-    line_geo_final = dict(); plane_geo_final = dict(); part_color_all = dict(); part_color_final = dict(); part_count_final = dict(); final_objects = []
-
-    geometry = True
-    for part, g in line_geo.items():
-      part = utils.rename_part(part, obj_name)
-      stand, geometry = utils.check_g(g)
-
-      geo = [stand[0], stand[1], stand[2]]
-      geo = rotation_matrix.dot(geo).tolist()
-
-      line_geo_final[part] = geo
-    
-    for part, g in plane_geo.items():
-      part = utils.rename_part(part, obj_name)
-      stand = g[0]
-      geo = [stand[0], stand[1], stand[2]]
-      geo = rotation_matrix.dot(geo).tolist()
-
-      plane_geo_final[part] = geo
-
-    for part, color in part_color.items():
-      part_color_all[part] = color
-      part = utils.rename_part(part, obj_name)
-      
-      if part in part_list2:
-        part_color_final[part] = color
-    
-    for part in all_objects:
-      part = utils.rename_part(part, obj_name)
-      final_objects.append(part)
-
-    for part, count in part_count.items():
-      part = utils.rename_part(part, obj_name)
-      if part in count_list:
-        if not part in part_count_final.keys():
-          part_count_final[part] = count
-        else:
-          part_count_final[part] += count
-
-    return line_geo_final, plane_geo_final, part_color_all, part_color_final, part_count_final, geometry, final_objects
-
-def check_part(obj_name, part_count_final, part_color_final):
-    keep = True
-    if "wheel" in part_count_final.keys() and obj_name in ['Chair', 'Table']:
-      if "leg" in part_count_final.keys():
-        part_count_final["wheel"] = part_count_final["leg"]
-      else:
-        print ("wheel not paired with leg")
-        keep = False
-        
-    if obj_name == 'Chair' and not ('leg' in part_color_final.keys() or 'central_support' in part_color_final.keys() or 'pedestal' in part_color_final.keys()):
-      print ("lack base of chair")
-      keep = False
-
-    if obj_name == 'Refrigerator' and not 'door' in part_color_final.keys():
-      print ("lack door of fridge")
-      keep = False
-
-    if obj_name == 'Chair' and ('arm' in part_color_final.keys() and ('arm vertical bar' in part_color_final.keys() or 'arm horizontal bar' in part_color_final.keys())):
-      print ("duplicate arm entry")
-      keep = False
-    return keep
-    
 def compute_all_relationships(scene_struct, eps=0.2):
   """
   Computes relationships between all pairs of objects in the scene.
@@ -845,7 +1070,7 @@ def compute_all_relationships(scene_struct, eps=0.2):
 if __name__ == '__main__':
   if INSIDE_BLENDER:
     # Run normally
-    argv = utils.extract_args()
+    argv = extract_args()
     args = parser.parse_args(argv)
     main(args)
   elif '--help' in sys.argv or '-h' in sys.argv:
@@ -853,7 +1078,7 @@ if __name__ == '__main__':
   else:
     print('This script is intended to be called from blender like this:')
     print()
-    print('blender --background --python render_images_partnet.py -- [args]')
+    print('blender --background --python render_images.py -- [args]')
     print()
     print('You can also run as a standalone python script to view all')
     print('arguments like this:')

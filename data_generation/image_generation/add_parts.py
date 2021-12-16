@@ -76,6 +76,28 @@ def add_mesh(obj_name, v, f, cur_render_dir, color=[0.216, 0.494, 0.722]):
     cmd = 'rm -rf %s %s %s' % (tmp_obj, tmp_mtl, blend+"1")
     call(cmd, shell=True)
 
+def add_mesh2(obj_name, part, v, f, tmp_dir, color=[0.216, 0.494, 0.722]):
+    part = part.replace(" ", "_")
+
+    if not os.path.exists(tmp_dir):
+        os.mkdir(tmp_dir)
+    
+    dirs = os.listdir(os.path.join("%s_urdf" %tmp_dir, obj_name))
+
+    tmp_obj = os.path.join("%s_urdf"%tmp_dir, obj_name, obj_name + "{:03d}".format(len(dirs)) + part + ".obj")
+    blend = os.path.join(tmp_dir, obj_name+'.blend')
+
+    tmp_mtl = export_obj(tmp_obj, v, f, color=color)
+
+    if obj_name+'.blend' in os.listdir(tmp_dir):
+        cmd = 'bash part_utils/add_part.sh %s %s %s' % (blend, tmp_obj, blend)
+    else:
+        cmd = 'bash part_utils/add_part.sh part_utils/model.blend %s %s' % (tmp_obj, blend)
+
+    call(cmd, shell=True)
+
+    cmd = 'rm -rf %s' % (blend+"1")
+    call(cmd, shell=True)
 
 def add_one_part(scale, data, cur_part_dir, cur_render_dir, obj_name, part_list, geo_list1, geo_list2, part_dict = dict(), count_dict = dict(), objs_dict = dict(), final_objs = [], line_dict = dict(), plane_dict = dict()):
     
@@ -153,6 +175,90 @@ def add_one_part(scale, data, cur_part_dir, cur_render_dir, obj_name, part_list,
 
     return part_v, part_f, part_dict, count_dict, objs_dict, final_objs, line_dict, plane_dict
 
+
+def add_one_part_physics(scale, data, cur_part_dir, cur_render_dir, obj_name, part_list, geo_list1, geo_list2, tmp_dir, part_dict = dict(), count_dict = dict(), objs_dict = dict(), final_objs = [], line_dict = dict(), plane_dict = dict()):
+    cur_v_list = []; cur_f_list = []; cur_v_num = 0; 
+    
+    part = data['name']
+    part = rename_one_part(part, obj_name)
+
+    i = 0
+    if 'objs' in data.keys():
+        for child in data['objs']:
+            try:
+                v, f = load_obj(os.path.join(cur_part_dir, child+'.obj'))
+                # v -= center
+                v /= scale
+                cur_v_list.append(v)
+                cur_f_list.append(f+cur_v_num)
+                cur_v_num += v.shape[0]
+                i += 1
+            except:
+                pass
+    if 'children' in data.keys():
+        for child in data['children']:
+            v, f, part_dict, count_dict, objs_dict, final_objs, line_dict, plane_dict = add_one_part_physics(scale, child, cur_part_dir, cur_render_dir, obj_name, part_list, geo_list1, geo_list2, tmp_dir, part_dict, count_dict, objs_dict, final_objs, line_dict, plane_dict)
+            if 'objs' not in data.keys() and (not v == np.vstack([[]])):
+                cur_v_list.append(v)
+                cur_f_list.append(f+cur_v_num)
+                cur_v_num += v.shape[0]
+                i += 1
+    keep = True
+
+    if i == 0: 
+        keep = False
+        cur_v_list = [[]]
+        cur_f_list = [[]]
+    part_v = np.vstack(cur_v_list)
+    part_f = np.vstack(cur_f_list)
+
+    
+    if part == 'chair_arm' and ('arm_near_vertical_bar' in part_dict.keys() or 'arm_horizontal_bar' in part_dict.keys()):
+        keep = False
+
+    if keep:
+        if part in count_dict.keys():
+            count_dict[part] += 1
+        else:
+            count_dict[part] = 1
+
+    chosen_v = []
+
+    for face in part_f:
+        for fa in face:
+            chosen_v.append(part_v[fa-1])
+
+    chosen_v = np.array(chosen_v)
+
+
+    if part in part_list:
+        if keep:
+            line_dict, plane_dict = find_equation(part, chosen_v, geo_list1, geo_list2, line_dict, plane_dict)
+            final_objs.append(part)
+            if not part in objs_dict.keys():
+                objs_dict[part] = []
+            objs_dict[part].extend(data['objs'])
+
+            if not part in part_dict.keys():
+                color_name, rgba = random.choice(list(colors.items()))
+                
+
+                if (part == 'arm_near_vertical_bar' and 'arm_horizontal_bar' in part_dict.keys()):
+                    while color_name == part_dict['arm_horizontal_bar'][0]:
+                        color_name, rgba = random.choice(list(colors.items()))
+
+                if (part == 'arm_horizontal_bar' and 'arm_near_vertical_bar' in part_dict.keys()):
+                    while color_name == part_dict['arm_near_vertical_bar'][0]:
+                        color_name, rgba = random.choice(list(colors.items()))
+
+                part_dict[part] = (color_name, rgba)
+
+            color_name = part_dict[part][0]
+            rgba = [float(int(c)) / 255.0 for c in part_dict[part][1]] + [1.0]
+            
+            add_mesh2(obj_name, part, part_v, part_f, tmp_dir, color=rgba)
+
+    return part_v, part_f, part_dict, count_dict, objs_dict, final_objs, line_dict, plane_dict
 
 def rename_one_part(part, obj_name):
     if 'Table' in obj_name:

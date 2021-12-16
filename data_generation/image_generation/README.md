@@ -1,9 +1,9 @@
 # Data Download
 First download the [PartNet dataset](https://partnet.cs.stanford.edu/), denoted as data_dir.
 
-Then download the [Cart Category from PartNet Mobility Dataset](https://sapien.ucsd.edu/browse), denoted as cart_dir. Same as data_dir, cart_dir contains a list of ids of the cart shapes.
+Then download the [Cart Category from PartNet Mobility Dataset](https://sapien.ucsd.edu/browse), denoted as mobility_dir. Same as data_dir, mobility_dir contains a list of ids of the cart shapes.
 
-# Blender#
+# Blender
 We render synthetic images using [Blender2.78](https://www.blender.org/download/releases/2-78/), outputting both rendered images as well as a JSON file containing ground-truth scene information for each image.
 
 Blender ships with its own installation of Python which is used to execute scripts that interact with Blender; you'll need to add the image_generation directory to Python path of Blender's bundled Python. The easiest way to do this is by adding a .pth file to the site-packages directory of Blender's Python, like this:
@@ -16,6 +16,25 @@ where $BLENDER is the directory where Blender is installed and $VERSION is your 
 ```
 echo $PWD > /usr/local/blender/2.78/python/lib/python3.5/site-packages/ptr.pth
 ```
+
+Note that blender uses its own python and pip. So if we want to import python modules in our scripts and those modules are not installed. We first have to install the modules first. **blender 2.78 does not have pip installed**. To install pip, first cd into this folder:
+```
+cd $BLENDER/$VERSION/python/bin
+```
+and then 
+```
+wget https://bootstrap.pypa.io/pip/3.5/get-pip.py
+```
+after that, run
+```
+./python3.5m get-pip.py
+```
+this should have pip installed. run
+```
+./pip3.5 install [module]
+```
+to install the modules
+
 
 on OSX you might run:
 
@@ -37,7 +56,7 @@ blender --background --python render_images_partnet.py -- [args]
 
 *e.g.,*
 ```
-blender --background --python render_images_partnet.py -- --data_dir [data_dir] --cart_dir [cart_dir] --num_images 2000 --tmp_dir tmp1 --gpu 1
+blender --background --python render_images_partnet.py -- --data_dir [data_dir] --mobility_dir [mobility_dir] --num_images 2000 --tmp_dir tmp1 --gpu 1
 ```
 
 Any arguments following the `--` will be captured by `render_images_partnet.py`.
@@ -48,4 +67,10 @@ When rendering on cluster machines without audio drivers installed you may need 
 
 ```
 blender --background -noaudio --python render_images_partnet.py -- [args]
+```
+
+If you want to generate physical scenes, invoke `render_images_physics.py` like this:
+
+```
+blender --background --python render_images_physics.py -- [args]
 ```
