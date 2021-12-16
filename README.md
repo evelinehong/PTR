@@ -49,6 +49,7 @@ The scene annotation is a json file that contains the following keys:
         pixel_coords    #the pixel of the object
     relationships       #according to the directions, the spatial relationships of the objects
     projection_matrix   #the projection matrix of the camera to reconstruct 3D scene using depths
+    physics(optional)   #if physics in the keys and the key is True, this is a physical scene.
 ```
 
 The question file is a json file which contains a list of questions. Each question has the following keys:
