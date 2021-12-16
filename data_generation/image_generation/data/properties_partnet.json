@@ -1,0 +1,35 @@
+{ "semantic":{
+    "categories":{
+      "back": 0,
+      "surface": 1,
+      "arms": 2,
+      "leg": 3,
+      "pedestal": 4
+    },
+    
+    "colors": {
+      "gray": [87, 87, 87],
+      "red": [173, 35, 35],
+      "blue": [42, 75, 215],
+      "green": [29, 105, 20],
+      "brown": [129, 74, 25],
+      "purple": [129, 38, 192],
+      "cyan": [41, 208, 208],
+      "yellow": [255, 238, 51]
+    },
+    "materials": {  
+      "rubber": "Rubber",
+      "metal": "MyMetal"
+    }
+  },
+  "object":{
+    "categories":{
+      "Chair": 0.3,
+      "Table": 0.3,
+      "Bed": 0.15, 
+      "Refrigerator": 0.15,
+      "Cart": 0.1
+    }
+  }
+}
+
