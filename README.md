@@ -62,6 +62,22 @@ The question file is a json file which contains a list of questions. Each questi
     type1               #the five questions types
     type2               #the 14 subtypes described in Table 2 in the paper
 ```
+
+## Data Generation Engine
+The images and scene annotations can be generated via invoking data_generation/image_generation/render_images_partnet.py
+```
+blender --background --python render_images_partnet.py -- [args]
+```
+
+To generate physical scenes, invoke data_generation/image_generation/render_images_physics.py
+```
+blender --background --python render_images_physics.py -- [args]
+```
+
+**For more instructions on image generation, please refer to [this directory](https://github.com/evelinehong/PTR/tree/main/data_generation/image_generation)**
+
+The data generation engine is based partly on the [CLEVR generation engine](https://github.com/facebookresearch/clevr-dataset-gen).
+
 ## Citations
     @inproceedings{hong2021ptr,
     author = {Hong, Yining and Yi, Li and Tenenbaum, Joshua B and Torralba, Antonio and Gan, Chuang},
