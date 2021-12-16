@@ -1,0 +1,462 @@
+{
+  "dataset": "PartNet",
+  "types": {
+    "Object": null,
+    "ObjectSet": null,
+    "Part": null,
+    "PartSet": null,
+    "Integer": null,
+    "Bool": null,
+    "Geometry": null,
+    "Object-Category": [
+      "Chair", "Bed", "Table", "Refrigerator", "Cart"
+    ],
+    "Part-Category": [
+      "arm", "leg", "back", "seat", "central support", "pedestal", "leg bar", "wheel", "arm vertical bar", "arm horizontal bar", "back vertical bar", "back horizontal bar", "door", "frame", "sleep area", "top", "drawer", "shelf", "body"
+    ],
+    "Object-Part-Category":{
+      "Chair": ["arm", "leg", "back", "seat", "central support", "pedestal", "leg bar", "wheel", "arm vertical bar", "arm horizontal bar", "back vertical bar", "back horizontal bar"],
+      "Table": ["top", "drawer", "shelf", "leg", "pedestal", "leg bar", "door", "central support"],
+      "Refrigerator": ["body", "door"],
+      "Bed": ["sleep area", "back", "leg", "leg bar"],
+      "Cart": ["body", "wheel"]
+    },
+    "Color": [
+      "gray", "red", "blue", "green", "brown", "purple", "cyan", "yellow"
+    ],
+    "Relation": [
+      "left", "right", "behind", "front", "above", "below"
+    ],
+    "Direction": [
+      "left", "right", "behind", "front"
+    ]
+  },
+  "functions": [
+    {
+      "name": "scene",
+      "inputs": [],
+      "output": "ObjectSet",
+      "terminal": false
+    },
+    {
+      "name": "filter_part_color",
+      "inputs": ["PartSet"],
+      "side_inputs": ["Color"],
+      "output": "PartSet",
+      "terminal": false
+    },
+    {
+      "name": "filter_object_category",
+      "inputs": ["ObjectSet"],
+      "side_inputs": ["Object-Category"],
+      "output": "ObjectSet",
+      "terminal": false
+    },
+    {
+      "name": "filter_part",
+      "input": "Object",
+      "side_intputs": ["Part-Category"],
+      "output": "PartSet",
+      "terminal": false
+    },
+    {
+      "name": "filter_stability",
+      "input": ["ObjectSet"],
+      "output": "ObjectSet",
+      "terminal": false
+    },
+    {
+      "name": "filter_unstability",
+      "input": ["ObjectSet"],
+      "output": "ObjectSet",
+      "terminal": false
+    },
+    {
+      "name": "unique",
+      "inputs": ["ObjectSet"],
+      "output": "Object",
+      "terminal": false,
+      "properties": []
+    },
+    {
+      "name": "relate",
+      "inputs": ["Object"],
+      "side_inputs": ["Relation"],
+      "output": "ObjectSet",
+      "terminal": false
+    },
+    {
+      "name": "union",
+      "inputs": ["ObjectSet", "ObjectSet"],
+      "output": "ObjectSet",
+      "terminal": false
+    },
+    {
+      "name": "intersect",
+      "inputs": ["ObjectSet", "ObjectSet"],
+      "output": "ObjectSet",
+      "terminal": false
+    },
+    {
+      "name": "count",
+      "inputs": ["ObjectSet"],
+      "output": "Integer",
+      "terminal": true
+    },
+    {
+      "name": "count_part",
+      "inputs": ["PartSet"],
+      "output": "Integer",
+      "terminal": true
+    },
+    {
+      "name": "query_object-category",
+      "inputs": ["Object"],
+      "output": "Object-Category",
+      "terminal": true
+    },
+    {
+      "name": "query_part-category",
+      "inputs": ["Part"],
+      "output": "Part-Category",
+      "terminal": true
+    },
+    {
+      "name": "query_part-color",
+      "inputs": ["Part"],
+      "output": "Color",
+      "terminal": true
+    },
+    {
+      "name": "query_stability",
+      "inputs": ["Object"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "query_unstability",
+      "inputs": ["Object"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "query_change",
+      "inputs": ["Object"],
+      "side_inputs": "Direction",
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "query_direction",
+      "inputs": ["Object"],
+      "output": "Direction",
+      "terminal": true
+    },
+    {
+      "name": "query_part-count",
+      "inputs": ["Part"],
+      "output": "Integer",
+      "terminal": true
+    },
+    {
+      "name": "query_part-geometry",
+      "inputs": ["Part"],
+      "output": "Geometry",
+      "terminal": true
+    },
+    {
+      "name": "count_perpendicular_line",
+      "inputs": ["Part"],
+      "output": "Integer",
+      "terminal": true
+    },
+    {
+      "name": "count_perpendicular_plane",
+      "inputs": ["Part"],
+      "output": "Integer",
+      "terminal": true
+    },
+    {
+      "name": "exist_perpendicular_line",
+      "inputs": ["Part"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "exist_perpendicular_plane",
+      "inputs": ["Part"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "query_perpendicular_line_color",
+      "inputs": ["Part"],
+      "output": "Color",
+      "terminal": true
+    },
+    {
+      "name": "query_perpendicular_plane_color",
+      "inputs": ["Part"],
+      "output": "Color",
+      "terminal": true
+    },
+    {
+      "name": "count_parallel_line",
+      "inputs": ["Part"],
+      "output": "Integer",
+      "terminal": true
+    },
+    {
+      "name": "count_parallel_plane",
+      "inputs": ["Part"],
+      "output": "Integer",
+      "terminal": true
+    },
+    {
+      "name": "exist_parallel_line",
+      "inputs": ["Part"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "exist_parallel_plane",
+      "inputs": ["Part"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "query_parallel_line_color",
+      "inputs": ["Part"],
+      "output": "Color",
+      "terminal": true
+    },
+    {
+      "name": "query_parallel_plane_color",
+      "inputs": ["Part"],
+      "output": "Color",
+      "terminal": true
+    },
+    {
+      "name": "query_geometric-relation",
+      "inputs": ["Part", "Part"],
+      "output": "",
+      "terminal": false
+    },
+    {
+      "name": "query_geometric-analogy-color",
+      "inputs": ["Part", "Part"],
+      "output": "Color",
+      "terminal": true
+    },
+    {
+      "name": "query_geometric-analogy-count",
+      "inputs": ["Part", "Part"],
+      "output": "Integer",
+      "terminal": true
+    },
+    {
+      "name": "perpendicular",
+      "inputs": "Geometry",
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "parallel",
+      "inputs": "Geometry",
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "query_positional-relation",
+      "inputs": ["Object", "Object"],
+      "output": "Relation",
+      "terminal": false
+    },
+    {
+      "name": "query_positional-analogy-category",
+      "inputs": ["Part", "Part"],
+      "output": "Object-Category",
+      "terminal": true
+    },
+    {
+      "name": "query_positional-analogy-count",
+      "inputs": ["Part", "Part"],
+      "output": "Integer",
+      "terminal": true
+    },
+    {
+      "name": "query_positional-analogy-exist",
+      "inputs": ["Part", "Part"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "exist",
+      "inputs": ["ObjectSet"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "exist_part",
+      "inputs": ["Object"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "equal_part-color",
+      "inputs": ["Color", "Color"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "equal_part-count",
+      "inputs": ["Integer", "Integer"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "equal_object-category",
+      "inputs": ["Object-Category", "Object-Category"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "equal_part-category",
+      "inputs": ["Part-Category", "Part-Category"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "equal_integer",
+      "inputs": ["Integer", "Integer"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "less_than",
+      "inputs": ["Integer", "Integer"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "greater_than",
+      "inputs": ["Integer", "Integer"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "equal_object",
+      "inputs": ["Object", "Object"],
+      "output": "Bool",
+      "terminal": true
+    },
+    {
+      "name": "sum",
+      "inputs": ["Integer", "Integer"],
+      "output": "Integer",
+      "terminal": true
+    },
+    {
+      "name": "minus_more",
+      "inputs": ["Integer", "Integer"],
+      "output": "Integer",
+      "terminal": true
+    },
+    {
+      "name": "minus_less",
+      "inputs": ["Integer", "Integer"],
+      "output": "Integer",
+      "terminal": true
+    },
+    {
+      "name": "same_color",
+      "inputs": ["Part"],
+      "output": "PartSet",
+      "terminal": false
+    },
+    {
+      "name": "same_object_category",
+      "inputs": ["Object"],
+      "output": "ObjectSet",
+      "terminal": false
+    },
+    {
+      "name": "same_part_category",
+      "inputs": ["Part"],
+      "output": "PartSet",
+      "terminal": false
+    },
+    {
+      "name": "filter",
+      "inputs": ["ObjectSet"],
+      "side_inputs": ["Object-Category", "PartSet"],
+      "output": "ObjectSet",
+      "terminal": false,
+      "template_only": true
+    },
+    {
+      "name": "filter_object_unique",
+      "inputs": ["ObjectSet"],
+      "side_inputs": ["Object-Category", "PartSet"],
+      "output": "Object",
+      "terminal": false,
+      "template_only": true
+    },
+    {
+      "name": "filter_object_count",
+      "inputs": ["ObjectSet"],
+      "side_inputs": ["Object-Category", "PartSet"],
+      "output": "Integer",
+      "terminal": true,
+      "template_only": true
+    },
+    {
+      "name": "filter_part_count",
+      "inputs": ["ObjectSet"],
+      "side_inputs": ["Object-Category", "PartSet"],
+      "output": "Integer",
+      "terminal": true,
+      "template_only": true
+    },
+    {
+      "name": "filter_object_exist",
+      "inputs": ["ObjectSet"],
+      "side_inputs": ["Object-Category", "PartSet"],
+      "output": "Bool",
+      "terminal": true,
+      "template_only": true
+    },
+    {
+      "name": "relate_filter",
+      "inputs": ["Object"],
+      "side_inputs": ["Relation", "Object-Category", "PartSet"],
+      "output": "ObjectSet",
+      "terminal": false,
+      "template_only": true
+    },
+    {
+      "name": "relate_filter_unique",
+      "inputs": ["Object"],
+      "side_inputs": ["Relation", "Object-Category", "PartSet"],
+      "output": "Object",
+      "terminal": false,
+      "template_only": true
+    },
+    {
+      "name": "relate_filter_count",
+      "inputs": ["Object"],
+      "side_inputs": ["Relation", "Object-Category", "PartSet"],
+      "output": "Integer",
+      "terminal": false,
+      "template_only": true
+    },
+    {
+      "name": "relate_filter_exist",
+      "inputs": ["Object"],
+      "side_inputs": ["Relation", "Object-Category", "PartSet"],
+      "output": "Bool",
+      "terminal": false,
+      "template_only": true
+    }
+  ]
+}

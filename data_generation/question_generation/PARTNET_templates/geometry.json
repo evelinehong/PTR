@@ -1,0 +1,1468 @@
+[
+    {
+        "text": [
+            "Is the <CL3> part of the <S> with <CT> <CL> <P> and the <CL4> part of the <S2> with <CT2> <CL2> <P2> perpendicular?"
+        ],
+        "nodes": [
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S2>",
+                    "<P2>",
+                    "<CT2>",
+                    "<CL2>"
+                ],
+                "inputs": [
+                    0
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL4>"
+                ],
+                "inputs": [
+                    1
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S>",
+                    "<P>",
+                    "<CT>",
+                    "<CL>"
+                ],
+                "inputs": [
+                    3
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL3>"
+                ],
+                "inputs": [
+                    4
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [
+                    2,
+                    5
+                ],
+                "type": "query_geometric-relation"
+            },
+            {
+                "inputs": [
+                    6
+                ],
+                "type": "perpendicular"
+            }
+        ],
+        "params": [
+            {
+                "type": "Object-Category",
+                "name": "<S>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P>"
+            },
+            {
+                "type": "Object-Category",
+                "name": "<S2>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL2>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL3>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL4>"
+            }
+        ],
+        "constraints": [
+            {
+                "params": [
+                    1,
+                    4
+                ],
+                "type": "OUT_NEQ"
+            }
+        ]
+    },
+    {
+        "text": [
+            "Is the <CL3> part of the <S> with <CT> <CL> <P> and the <CL4> part of the <S2> with <CT2> <CL2> <P2> parallel?"
+        ],
+        "nodes": [
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S2>",
+                    "<P2>",
+                    "<CT2>",
+                    "<CL2>"
+                ],
+                "inputs": [
+                    0
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL4>"
+                ],
+                "inputs": [
+                    1
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S>",
+                    "<P>",
+                    "<CT>",
+                    "<CL>"
+                ],
+                "inputs": [
+                    3
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL3>"
+                ],
+                "inputs": [
+                    4
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [
+                    5,
+                    2
+                ],
+                "type": "query_geometric-relation"
+            },
+            {
+                "inputs": [
+                    6
+                ],
+                "type": "parallel"
+            }
+        ],
+        "params": [
+            {
+                "type": "Object-Category",
+                "name": "<S>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P>"
+            },
+            {
+                "type": "Object-Category",
+                "name": "<S2>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL2>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL3>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL4>"
+            }
+        ],
+        "constraints": [
+            {
+                "params": [
+                    1,
+                    4
+                ],
+                "type": "OUT_NEQ"
+            }
+        ]
+    },
+    {
+        "text": [
+            "How many parts of the <S> with <CT> <CL> <P> can be considered a line and is perpendicular to the <CL3> part of the <S2> with <CT2> <CL2> <P2>?"
+        ],
+        "nodes": [
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S2>",
+                    "<P2>",
+                    "<CT2>",
+                    "<CL2>"
+                ],
+                "inputs": [
+                    0
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL3>"
+                ],
+                "inputs": [
+                    1
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S>",
+                    "<P>",
+                    "<CT>",
+                    "<CL>"
+                ],
+                "inputs": [
+                    3
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "inputs": [
+                    4,
+                    2
+                ],
+                "type": "count_perpendicular_line"
+            }
+        ],
+        "params": [
+            {
+                "type": "Object-Category",
+                "name": "<S>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P>"
+            },
+            {
+                "type": "Object-Category",
+                "name": "<S2>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL2>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL3>"
+            }
+        ],
+        "constraints": [
+            {
+                "params": [
+                    1,
+                    4
+                ],
+                "type": "OUT_NEQ"
+            }
+        ]
+    },
+    {
+        "text": [
+            "How many parts of the <S> with <CT> <CL> <P> can be considered a plane and is perpendicular to the <CL3> part of the <S2> with <CT2> <CL2> <P2>?"
+        ],
+        "nodes": [
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S2>",
+                    "<P2>",
+                    "<CT2>",
+                    "<CL2>"
+                ],
+                "inputs": [
+                    0
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL3>"
+                ],
+                "inputs": [
+                    1
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S>",
+                    "<P>",
+                    "<CT>",
+                    "<CL>"
+                ],
+                "inputs": [
+                    3
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "inputs": [
+                    4,
+                    2
+                ],
+                "type": "count_perpendicular_plane"
+            }
+        ],
+        "params": [
+            {
+                "type": "Object-Category",
+                "name": "<S>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P>"
+            },
+            {
+                "type": "Object-Category",
+                "name": "<S2>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL2>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL3>"
+            }
+        ],
+        "constraints": [
+            {
+                "params": [
+                    1,
+                    4
+                ],
+                "type": "OUT_NEQ"
+            }
+        ]
+    },
+    {
+        "text": [
+            "How many parts of the <S> with <CT> <CL> <P> can be considered a line and is parallel to the <CL3> part of the <S2> with <CT2> <CL2> <P2>?"
+        ],
+        "nodes": [
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S2>",
+                    "<P2>",
+                    "<CT2>",
+                    "<CL2>"
+                ],
+                "inputs": [
+                    0
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL3>"
+                ],
+                "inputs": [
+                    1
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S>",
+                    "<P>",
+                    "<CT>",
+                    "<CL>"
+                ],
+                "inputs": [
+                    3
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "inputs": [
+                    4,
+                    2
+                ],
+                "type": "count_parallel_line"
+            }
+        ],
+        "params": [
+            {
+                "type": "Object-Category",
+                "name": "<S>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P>"
+            },
+            {
+                "type": "Object-Category",
+                "name": "<S2>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL2>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL3>"
+            }
+        ],
+        "constraints": [
+            {
+                "params": [
+                    1,
+                    4
+                ],
+                "type": "OUT_NEQ"
+            }
+        ]
+    },
+    {
+        "text": [
+            "How many parts of the <S> with <CT> <CL> <P> can be considered a plane and is parallel to the <CL3> part of the <S2> with <CT2> <CL2> <P2>?"
+        ],
+        "nodes": [
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S2>",
+                    "<P2>",
+                    "<CT2>",
+                    "<CL2>"
+                ],
+                "inputs": [
+                    0
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL3>"
+                ],
+                "inputs": [
+                    1
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S>",
+                    "<P>",
+                    "<CT>",
+                    "<CL>"
+                ],
+                "inputs": [
+                    3
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "inputs": [
+                    4,
+                    2
+                ],
+                "type": "count_parallel_plane"
+            }
+        ],
+        "params": [
+            {
+                "type": "Object-Category",
+                "name": "<S>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P>"
+            },
+            {
+                "type": "Object-Category",
+                "name": "<S2>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL2>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL3>"
+            }
+        ],
+        "constraints": [
+            {
+                "params": [
+                    1,
+                    4
+                ],
+                "type": "OUT_NEQ"
+            }
+        ]
+    },
+    {
+        "text": [
+            "Is there a part of the <S> with <CT> <CL> <P> that can be considered a line and is parallel to the <CL3> part of the <S2> with <CT2> <CL2> <P2>?"
+        ],
+        "nodes": [
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S2>",
+                    "<P2>",
+                    "<CT2>",
+                    "<CL2>"
+                ],
+                "inputs": [
+                    0
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL3>"
+                ],
+                "inputs": [
+                    1
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S>",
+                    "<P>",
+                    "<CT>",
+                    "<CL>"
+                ],
+                "inputs": [
+                    3
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "inputs": [
+                    4,
+                    2
+                ],
+                "type": "exist_parallel_line"
+            }
+        ],
+        "params": [
+            {
+                "type": "Object-Category",
+                "name": "<S>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P>"
+            },
+            {
+                "type": "Object-Category",
+                "name": "<S2>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL2>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL3>"
+            }
+        ],
+        "constraints": [
+            {
+                "params": [
+                    1,
+                    4
+                ],
+                "type": "OUT_NEQ"
+            }
+        ]
+    },
+    {
+        "text": [
+            "Is there a part of the <S> with <CT> <CL> <P> that can be considered a plane and is parallel to the <CL3> part of the <S2> with <CT2> <CL2> <P2>?"
+        ],
+        "nodes": [
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S2>",
+                    "<P2>",
+                    "<CT2>",
+                    "<CL2>"
+                ],
+                "inputs": [
+                    0
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL3>"
+                ],
+                "inputs": [
+                    1
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S>",
+                    "<P>",
+                    "<CT>",
+                    "<CL>"
+                ],
+                "inputs": [
+                    3
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "inputs": [
+                    4,
+                    2
+                ],
+                "type": "exist_parallel_plane"
+            }
+        ],
+        "params": [
+            {
+                "type": "Object-Category",
+                "name": "<S>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P>"
+            },
+            {
+                "type": "Object-Category",
+                "name": "<S2>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL2>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL3>"
+            }
+        ],
+        "constraints": [
+            {
+                "params": [
+                    1,
+                    4
+                ],
+                "type": "OUT_NEQ"
+            }
+        ]
+    },
+    {
+        "text": [
+            "Is there a part of the <S> with <CT> <CL> <P> that can be considered a line and is perpendicular to the <CL3> part of the <S2> with <CT2> <CL2> <P2>?"
+        ],
+        "nodes": [
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S2>",
+                    "<P2>",
+                    "<CT2>",
+                    "<CL2>"
+                ],
+                "inputs": [
+                    0
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL3>"
+                ],
+                "inputs": [
+                    1
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S>",
+                    "<P>",
+                    "<CT>",
+                    "<CL>"
+                ],
+                "inputs": [
+                    3
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "inputs": [
+                    4,
+                    2
+                ],
+                "type": "exist_perpendicular_line"
+            }
+        ],
+        "params": [
+            {
+                "type": "Object-Category",
+                "name": "<S>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P>"
+            },
+            {
+                "type": "Object-Category",
+                "name": "<S2>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL2>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL3>"
+            }
+        ],
+        "constraints": [
+            {
+                "params": [
+                    1,
+                    4
+                ],
+                "type": "OUT_NEQ"
+            }
+        ]
+    },
+    {
+        "text": [
+            "Is there a part of the <S> with <CT> <CL> <P> that can be considered a plane and is perpendicular to the <CL3> part of the <S2> with <CT2> <CL2> <P2>?"
+        ],
+        "nodes": [
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S2>",
+                    "<P2>",
+                    "<CT2>",
+                    "<CL2>"
+                ],
+                "inputs": [
+                    0
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL3>"
+                ],
+                "inputs": [
+                    1
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S>",
+                    "<P>",
+                    "<CT>",
+                    "<CL>"
+                ],
+                "inputs": [
+                    3
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "inputs": [
+                    4,
+                    2
+                ],
+                "type": "exist_perpendicular_plane"
+            }
+        ],
+        "params": [
+            {
+                "type": "Object-Category",
+                "name": "<S>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P>"
+            },
+            {
+                "type": "Object-Category",
+                "name": "<S2>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL2>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL3>"
+            }
+        ],
+        "constraints": [
+            {
+                "params": [
+                    1,
+                    4
+                ],
+                "type": "OUT_NEQ"
+            }
+        ]
+    },
+    {
+        "text": [
+            "What is the color of the part of the <S> with <CT> <CL> <P> that can be considered a line and is parallel to the <CL3> part of the <S2> with <CT2> <CL2> <P2>?"
+        ],
+        "nodes": [
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S2>",
+                    "<P2>",
+                    "<CT2>",
+                    "<CL2>"
+                ],
+                "inputs": [
+                    0
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL3>"
+                ],
+                "inputs": [
+                    1
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S>",
+                    "<P>",
+                    "<CT>",
+                    "<CL>"
+                ],
+                "inputs": [
+                    3
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "inputs": [
+                    4,
+                    2
+                ],
+                "type": "query_parallel_line_color"
+            }
+        ],
+        "params": [
+            {
+                "type": "Object-Category",
+                "name": "<S>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P>"
+            },
+            {
+                "type": "Object-Category",
+                "name": "<S2>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL2>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL3>"
+            }
+        ],
+        "constraints": [
+            {
+                "params": [
+                    1,
+                    4
+                ],
+                "type": "OUT_NEQ"
+            }
+        ]
+    },
+    {
+        "text": [
+            "What is the color of the part of the <S> with <CT> <CL> <P> that can be considered a plane and is parallel to the <CL3> part of the <S2> with <CT2> <CL2> <P2>?"
+        ],
+        "nodes": [
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S2>",
+                    "<P2>",
+                    "<CT2>",
+                    "<CL2>"
+                ],
+                "inputs": [
+                    0
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL3>"
+                ],
+                "inputs": [
+                    1
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S>",
+                    "<P>",
+                    "<CT>",
+                    "<CL>"
+                ],
+                "inputs": [
+                    3
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "inputs": [
+                    4,
+                    2
+                ],
+                "type": "query_parallel_plane_color"
+            }
+        ],
+        "params": [
+            {
+                "type": "Object-Category",
+                "name": "<S>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P>"
+            },
+            {
+                "type": "Object-Category",
+                "name": "<S2>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL2>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL3>"
+            }
+        ],
+        "constraints": [
+            {
+                "params": [
+                    1,
+                    4
+                ],
+                "type": "OUT_NEQ"
+            }
+        ]
+    },
+    {
+        "text": [
+            "What is the color of the part of the <S> with <CT> <CL> <P> that can be considered a line and is perpendicular to the <CL3> part of the <S2> with <CT2> <CL2> <P2>?"
+        ],
+        "nodes": [
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S2>",
+                    "<P2>",
+                    "<CT2>",
+                    "<CL2>"
+                ],
+                "inputs": [
+                    0
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL3>"
+                ],
+                "inputs": [
+                    1
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S>",
+                    "<P>",
+                    "<CT>",
+                    "<CL>"
+                ],
+                "inputs": [
+                    3
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "inputs": [
+                    4,
+                    2
+                ],
+                "type": "query_perpendicular_line_color"
+            }
+        ],
+        "params": [
+            {
+                "type": "Object-Category",
+                "name": "<S>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P>"
+            },
+            {
+                "type": "Object-Category",
+                "name": "<S2>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL2>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL3>"
+            }
+        ],
+        "constraints": [
+            {
+                "params": [
+                    1,
+                    4
+                ],
+                "type": "OUT_NEQ"
+            }
+        ]
+    },
+    {
+        "text": [
+            "What is the color of the part of the <S> with <CT> <CL> <P> that can be considered a plane and is perpendicular to the <CL3> part of the <S2> with <CT2> <CL2> <P2>?"
+        ],
+        "nodes": [
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S2>",
+                    "<P2>",
+                    "<CT2>",
+                    "<CL2>"
+                ],
+                "inputs": [
+                    0
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "side_inputs": [
+                    "<CL3>"
+                ],
+                "inputs": [
+                    1
+                ],
+                "type": "query_part-geometry"
+            },
+            {
+                "inputs": [],
+                "type": "scene"
+            },
+            {
+                "side_inputs": [
+                    "<S>",
+                    "<P>",
+                    "<CT>",
+                    "<CL>"
+                ],
+                "inputs": [
+                    3
+                ],
+                "type": "filter_object_unique"
+            },
+            {
+                "inputs": [
+                    4,
+                    2
+                ],
+                "type": "query_perpendicular_plane_color"
+            }
+        ],
+        "params": [
+            {
+                "type": "Object-Category",
+                "name": "<S>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P>"
+            },
+            {
+                "type": "Object-Category",
+                "name": "<S2>"
+            },
+            {
+                "type": "Part-Count",
+                "name": "<CT2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL2>"
+            },
+            {
+                "type": "Part-Category",
+                "name": "<P2>"
+            },
+            {
+                "type": "Color",
+                "name": "<CL3>"
+            }
+        ],
+        "constraints": [
+            {
+                "params": [
+                    1,
+                    4
+                ],
+                "type": "OUT_NEQ"
+            }
+        ]
+    }
+]
