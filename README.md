@@ -75,7 +75,12 @@ To generate physical scenes, invoke data_generation/image_generation/render_imag
 blender --background --python render_images_physics.py -- [args]
 ```
 
-**For more instructions on image generation, please refer to [this directory](https://github.com/evelinehong/PTR/tree/main/data_generation/image_generation)**
+**For more instructions on image generation, please go to [this directory](https://github.com/evelinehong/PTR/tree/main/data_generation/image_generation) and see the [README file](https://github.com/evelinehong/PTR/tree/main/data_generation/image_generation/README.md)**
+
+To generate questions and answers based on the images, please go to [this directory](https://github.com/evelinehong/PTR/tree/main/data_generation/question_generation), and run
+```
+python generate_questions.py --input_scene_dir $INPUT_SCENE_DIR --output_dir $OUTPUT_QUESTION_DIR --output_questions_file $OUTPUT_FILE
+```
 
 The data generation engine is based partly on the [CLEVR generation engine](https://github.com/facebookresearch/clevr-dataset-gen).
 
