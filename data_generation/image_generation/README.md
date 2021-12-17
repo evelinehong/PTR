@@ -1,7 +1,7 @@
 # Data Download
-First download the [PartNet dataset](https://partnet.cs.stanford.edu/), denoted as data_dir.
+First download the [PartNet dataset](https://partnet.cs.stanford.edu/), denoted as $DATA_DIR.
 
-Then download the [Cart Category from PartNet Mobility Dataset](https://sapien.ucsd.edu/browse), denoted as mobility_dir. Same as data_dir, mobility_dir contains a list of ids of the cart shapes.
+Then download the [Cart and Chair Category from PartNet Mobility Dataset](https://sapien.ucsd.edu/browse), denoted as $MOBILITY_DIR. Same as $DATA_DIR, $MOBILITY_DIR contains a list of ids of the cart shapes.
 
 # Blender
 We render synthetic images using [Blender2.78](https://www.blender.org/download/releases/2-78/), outputting both rendered images as well as a JSON file containing ground-truth scene information for each image.
@@ -56,7 +56,7 @@ blender --background --python render_images_partnet.py -- [args]
 
 *e.g.,*
 ```
-blender --background --python render_images_partnet.py -- --data_dir [data_dir] --mobility_dir [mobility_dir] --num_images 2000 --tmp_dir tmp1 --gpu 1
+blender --background --python render_images_partnet.py -- --data_dir $DATA_DIR --mobility_dir $MOBILITY_DIR --num_images 2000 --tmp_dir tmp1 --gpu 1
 ```
 
 Any arguments following the `--` will be captured by `render_images_partnet.py`.
