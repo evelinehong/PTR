@@ -22,9 +22,6 @@ Data and evaluation server can be found [here](http://ptr.csail.mit.edu/)
 ## TODOs
 baseline models will be available soon!
 
-## Errata
-We have manually examined the images, annotations and questions twice. However, provided that there are annotation errors of the PartNet dataset we used, there could still be some errors in the scene annotations. **If you find any errors that make the questions unanswerable, please contact yninghong@gmail.com**. 
-
 ## About the Data
 The data includes train/val/test images / questions / scene annotations / depths. 
 Note that due to data cleaning process, the indices of the images are not necessarily consecutive.
@@ -83,6 +80,9 @@ python generate_questions.py --input_scene_dir $INPUT_SCENE_DIR --output_dir $OU
 ```
 
 The data generation engine is based partly on the [CLEVR generation engine](https://github.com/facebookresearch/clevr-dataset-gen).
+
+## Errata
+We have manually examined the images, annotations and questions twice. However, provided that there are annotation errors of the PartNet dataset we used, there could still be some errors in the scene annotations. **If you find any errors that make the questions unanswerable, please contact yninghong@gmail.com**. 
 
 ## Citations
     @inproceedings{hong2021ptr,
